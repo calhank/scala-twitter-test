@@ -28,7 +28,7 @@ object Main extends App {
 
     println(s"I got executed with ${args size} args, they are: ${args mkString ", "}")
 
-    val statuses = stream.flatMap(status => status.getText())
+    val statuses = stream.map(status => status.getUser().getScreenName())
     statuses.print()
 
     // val hashTags = stream.flatMap(status => status.getText.split(" ").filter(_.startsWith("#")))
@@ -54,6 +54,12 @@ object Main extends App {
     //   println("\nPopular topics in last 10 seconds (%s total):".format(rdd.count()))
     //   topList.foreach{case (count, tag) => println("%s (%s tweets)".format(tag, count))}
     // })
+
+	sys.ShutdownHookThread {
+	      log.warn("Stopping Twitter Streaming Application")
+	      ssc.stop(true, true)
+	      log.warn("Application stopped")
+	  }
 
     ssc.start()
     ssc.awaitTermination()
