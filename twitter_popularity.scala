@@ -28,7 +28,7 @@ object Main extends App {
 
     println(s"I got executed with ${args size} args, they are: ${args mkString ", "}")
 
-    val statuses = stream.map(status => status.getText())
+    val statuses = stream.flatMap(status => status.getText())
     statuses.print()
 
     // val hashTags = stream.flatMap(status => status.getText.split(" ").filter(_.startsWith("#")))
