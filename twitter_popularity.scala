@@ -1,6 +1,5 @@
 
 // package org.apache.spark.streaming.twitter
-package org.apache.spark.examples.streaming
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.SparkContext._
 import org.apache.spark.streaming.twitter._
@@ -8,10 +7,12 @@ import org.apache.spark.SparkConf
 
 object Main extends App {
 
-	println(s"I got executed with ${args size} args, they are: ${args mkString ", "}")
+	if ( args.length < 2 ) {
+		System.err.println("Usage: <num_seconds_per_streaming_rdd> <filtertext>...")
+		System.exit(1)
+	}
 
-	// your code goes here
-	// StreamingExamples.setStreamingLogLevels()
+	println(s"I got executed with ${args size} args, they are: ${args mkString ", "}")
 
     val filters = args
 
@@ -28,8 +29,12 @@ object Main extends App {
 
     println(s"I got executed with ${args size} args, they are: ${args mkString ", "}")
 
+    // def get_user_and_text()
+
     val statuses = stream.map(status => status.getUser().getScreenName())
     statuses.print()
+    statuses.saveAsTextFile("tachyon://localhost:19998/users")
+
 
     // val hashTags = stream.flatMap(status => status.getText.split(" ").filter(_.startsWith("#")))
 
@@ -55,14 +60,10 @@ object Main extends App {
     //   topList.foreach{case (count, tag) => println("%s (%s tweets)".format(tag, count))}
     // })
 
-	sys.ShutdownHookThread {
-	      log.warn("Stopping Twitter Streaming Application")
-	      ssc.stop(true, true)
-	      log.warn("Application stopped")
-	  }
 
     ssc.start()
     ssc.awaitTermination()
 
+    statuses.saveAsTextFile("tachyon://localhost:19998/users2")
 
 }
