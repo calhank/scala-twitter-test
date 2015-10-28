@@ -32,9 +32,10 @@ object Main extends App {
 
     // def get_user_and_text()
 
-    // val statuses = stream.map(status => List( status.getUser().getScreenName(), status.getText().split(" ").filter(_.startsWith("#") )  ) )
-    val statuses = stream.map( status => status.getUser().getScreenName() )
+    val statuses = stream.map(status => List( status.getUser().getScreenName(), status.getText().split(" ").filter(_.startsWith("#") )  ) )
+    // val statuses = stream.map( status => status.getUser().getScreenName() )
     statuses.print()
+    // statuses.saveAsTextFiles("http://50.23.16.227:19998/statuses")
 
 
     // val hashTags = stream.flatMap(status => status.getText.split(" ").filter(_.startsWith("#")))
@@ -63,6 +64,6 @@ object Main extends App {
 
 
     ssc.start()
-    ssc.awaitTermination(10)
+    ssc.awaitTermination()
 
 }
