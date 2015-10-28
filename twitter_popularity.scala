@@ -25,7 +25,7 @@ object Main extends App {
 
     val sparkConf = new SparkConf().setAppName("TwitterPopularTags")
     // val ssc = new StreamingContext(sparkConf, Seconds( args(0).toInt ))
-    val ssc = new StreamingContext(sparkConf, Seconds( 2 ))
+    val ssc = new StreamingContext(sparkConf, Seconds( 2 ) )
     val stream = TwitterUtils.createStream(ssc, None, filters)
 
     println(s"I got executed with ${args size} args, they are: ${args mkString ", "}")
@@ -34,7 +34,9 @@ object Main extends App {
 
     val statuses = stream.map(status => ( status.getUser().getScreenName(), status.getText().split(" ").filter(_.startsWith("#") ) ) )
     // val statuses = stream.map( status => status.getUser().getScreenName() )
-    statuses.print()
+    statuses.foreachRDD( rdd => {
+    		rdd.take(10).foreach{ case (count, tag) => println("%s tweeted %s").format(count, tag.mkString(",")) }
+    	})
     // statuses.saveAsTextFiles("http://50.23.16.227:19998/statuses")
 
 
