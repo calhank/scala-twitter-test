@@ -30,12 +30,10 @@ object Main extends App {
 
     println(s"I got executed with ${args size} args, they are: ${args mkString ", "}")
 
-    // def get_user_and_text()
-
     val statuses = stream.map(status => ( status.getUser().getScreenName(), status.getText().split(" ").filter(_.startsWith("#") ) ) )
     // val statuses = stream.map( status => status.getUser().getScreenName() )
     statuses.foreachRDD( rdd => {
-    		rdd.take(10).foreach{ case (count, tag) => println("%s tweeted %s").format(count, tag.mkString(",")) }
+    		rdd.take(10).foreach{ case (count, tag) => println("%s tweeted %s".format(count, tag.mkString(","))) }
     	})
     // statuses.saveAsTextFiles("http://50.23.16.227:19998/statuses")
 
