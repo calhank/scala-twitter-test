@@ -24,7 +24,7 @@ object Main extends App {
     System.setProperty("twitter4j.oauth.accessTokenSecret", "H8DSy6MrLmMNnqk9IJh4JiTuk0XsDAmTfNgwmcb9OuQvk")
 
     val sparkConf = new SparkConf().setAppName("TwitterPopularTags")
-    val ssc = new StreamingContext(sparkConf, Seconds( args(1).toInt ))
+    val ssc = new StreamingContext(sparkConf, Seconds( args(0).toInt ))
     val stream = TwitterUtils.createStream(ssc, None, filters)
 
     println(s"I got executed with ${args size} args, they are: ${args mkString ", "}")
