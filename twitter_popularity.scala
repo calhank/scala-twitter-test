@@ -28,7 +28,7 @@ object Main extends App {
     // val ssc = new StreamingContext(sparkConf, Seconds( 2 ) )
     val stream = TwitterUtils.createStream(ssc, None, filters)
 
-    val tweets = stream.map(status => ( status.getUser().getScreenName(), status.getText().split(" ") )
+    val tweets = stream.map(status => ( status.getUser().getScreenName(), status.getText().split(" ") ) )
 
     val parsedTweets = tweets.map( tweet => (tweet(0), tweet(1).filter(_.startsWith("#")), tweet(1).filter(_.startsWith("@")) ) )
 
