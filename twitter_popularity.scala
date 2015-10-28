@@ -7,14 +7,14 @@ import org.apache.spark.SparkConf
 
 object Main extends App {
 
-	if ( args.length < 2 ) {
-		System.err.println("Usage: <num_seconds_per_streaming_rdd> <filtertext>...")
+	if ( args.length < 3 ) {
+		System.err.println("Usage: <num_seconds_per_streaming_rdd> <num top hashtags> <filtertext>...")
 		System.exit(1)
 	}
 
-	println(s"I got executed with ${args size} args, they are: ${args mkString ", "}")
+    val filters = args.takeRight( args.length - 2 )
 
-    val filters = args.takeRight( args.length - 1 )
+	println("Twitter Hashtag Streaming\nBatch Length: %s seconds\nTop Tweets: %s\nFilters: %s".format(args(0), args(1), filters.mkstring(", ")))
 
     // Set the system properties so that Twitter4j library used by twitter stream
     // can use them to generat OAuth credentials
@@ -24,16 +24,16 @@ object Main extends App {
     System.setProperty("twitter4j.oauth.accessTokenSecret", "H8DSy6MrLmMNnqk9IJh4JiTuk0XsDAmTfNgwmcb9OuQvk")
 
     val sparkConf = new SparkConf().setAppName("TwitterPopularTags")
-    // val ssc = new StreamingContext(sparkConf, Seconds( args(0).toInt ))
-    val ssc = new StreamingContext(sparkConf, Seconds( 2 ) )
+    val ssc = new StreamingContext(sparkConf, Seconds( args(0).toInt ))
+    // val ssc = new StreamingContext(sparkConf, Seconds( 2 ) )
     val stream = TwitterUtils.createStream(ssc, None, filters)
 
     println(s"I got executed with ${args size} args, they are: ${args mkString ", "}")
 
-    val statuses = stream.map(status => ( status.getUser().getScreenName(), status.getText().split(" ").filter(_.startsWith("#") ) ) )
+    val statuses = stream.map(status => ( status.getUser().getScreenName(), status.getText().split(" ").filter(_.startsWith("#")),  status.getText().split(" ").filter(_.startsWith("@"))) )
     // val statuses = stream.map( status => status.getUser().getScreenName() )
     statuses.foreachRDD( rdd => {
-    		rdd.take(10).foreach{ case (count, tag) => println("%s tweeted %s".format(count, tag.mkString(","))) }
+    		rdd.take(10).foreach{ case (user, tags, ats) => println("%s tweeted %s at %s\n".format(user, tags.mkString(", "), ats.mkString(", ") )) }
     	})
     // statuses.saveAsTextFiles("http://50.23.16.227:19998/statuses")
 
