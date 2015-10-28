@@ -28,11 +28,11 @@ object Main extends App {
     // val ssc = new StreamingContext(sparkConf, Seconds( 2 ) )
     val stream = TwitterUtils.createStream(ssc, None, filters)
 
-    println(s"I got executed with ${args size} args, they are: ${args mkString ", "}")
+    val parsedTweets = stream.map(status => ( status.getUser().getScreenName(), status.getText().split(" ").filter(_.startsWith("#")),  status.getText().split(" ").filter(_.startsWith("@"))) )
 
-    val statuses = stream.map(status => ( status.getUser().getScreenName(), status.getText().split(" ").filter(_.startsWith("#")),  status.getText().split(" ").filter(_.startsWith("@"))) )
+    val parsedTweetsWithHash = parsedTweets.filter(_(1).length>0)
     // val statuses = stream.map( status => status.getUser().getScreenName() )
-    statuses.foreachRDD( rdd => {
+    parsedTweetsWithHash.foreachRDD( rdd => {
     		rdd.take(10).foreach{ case (user, tags, ats) => println("%s tweeted %s at %s\n".format(user, tags.mkString(", "), ats.mkString(", ") )) }
     	})
     // statuses.saveAsTextFiles("http://50.23.16.227:19998/statuses")
