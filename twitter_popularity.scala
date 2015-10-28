@@ -49,11 +49,17 @@ object Main extends App {
     // 		rdd.take(top).foreach{ case (tag, user, ats) => println("%s by %s at %s".format(tag, user, ats.mkString(", ") )) }
     // 	})
 
-    val topHashtags = hashnum.reduceByKeyAndWindow(_ + _ , Seconds(2)).map{case(hash, num) => (num, hash)}.transform(_.sortByKey(false)).take(top)
+    val topHashtags = hashnum.reduceByKeyAndWindow(_ + _ , Seconds(2)).map{case(hash, num) => (num, hash)}.transform(_.sortByKey(false))
 
-    val joinstuff = topHashtags.join(hashfirst)
+    topHashtags.foreachRDD( rdd => {
+    	val ranks = rdd.take(top)
+    	val joinstuff = ranks.map{case(count, tag)=>(tag,count)}.join(hashfirst)
+    	joinstuff.print()
+    	} )
 
-    joinstuff.print()
+    // val joinstuff = topHashtags.join(hashfirst)
+
+    // joinstuff.print()
 
     // statuses.saveAsTextFiles("http://50.23.16.227:19998/statuses")
 
