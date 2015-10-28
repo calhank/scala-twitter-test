@@ -1,5 +1,5 @@
 object Main extends App {
-
+package org.apache.spark.streaming.twitter
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.SparkContext._
 import org.apache.spark.streaming.twitter._
