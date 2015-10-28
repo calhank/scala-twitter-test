@@ -14,7 +14,7 @@ object Main extends App {
 
     val filters = args.takeRight( args.length - 2 )
 
-	println("Twitter Hashtag Streaming\nBatch Length: %s seconds\nTop Tweets: %s\nFilters: %s".format(args(0), args(1), filters.mkstring(", ")))
+	println("Twitter Hashtag Streaming\nBatch Length: %s seconds\nTop Tweets: %s\nFilters: %s".format(args(0), args(1), filters.mkString(", ")))
 
     // Set the system properties so that Twitter4j library used by twitter stream
     // can use them to generat OAuth credentials
