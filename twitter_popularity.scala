@@ -12,9 +12,10 @@ object Main extends App {
 		System.exit(1)
 	}
 
+    val top = args(1).toInt
     val filters = args.takeRight( args.length - 2 )
 
-	println("Twitter Hashtag Streaming\nBatch Length: %s seconds\nTop Tweets: %s\nFilters: %s".format(args(0), args(1), filters.mkString(", ")))
+	println("\nTwitter Hashtag Streaming\nBatch Length: %s seconds\nTop Tweets: %s\nFilters: %s\n".format(args(0), args(1), filters.mkString(", ")))
 
     // Set the system properties so that Twitter4j library used by twitter stream
     // can use them to generat OAuth credentials
@@ -38,15 +39,15 @@ object Main extends App {
     // 		rdd.take(10).foreach{ case (user, tags, ats) => println("%s tweeted %s at %s\n".format(user, tags.mkString(", "), ats.mkString(", ") )) }
     // 	})
 
-	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, user, ats ) ) }
+	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats, 1) ) ) }
+	hashfirst.print()
 
-    hashfirst.foreachRDD( rdd => {
-    		val top = args(1).toInt
-    		println("\nTop %s Tweets".format(top))
-    		rdd.take(top).foreach{ case (tag, user, ats) => println("%s by %s at %s".format(tag, user, ats.mkString(", ") )) }
-    	})
+    // hashfirst.foreachRDD( rdd => {
+    // 		println("\nTop %s Tweets".format(top))
+    // 		rdd.take(top).foreach{ case (tag, user, ats) => println("%s by %s at %s".format(tag, user, ats.mkString(", ") )) }
+    // 	})
 
-    hashfirst
+    // val topHashtags = hashfitst.map{ case ()  }     ( _ , 1 ) ).reduceByKeyAndWindow
 
     // statuses.saveAsTextFiles("http://50.23.16.227:19998/statuses")
 
