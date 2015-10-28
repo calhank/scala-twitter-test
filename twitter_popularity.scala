@@ -28,29 +28,32 @@ object Main extends App {
 
     println(s"I got executed with ${args size} args, they are: ${args mkString ", "}")
 
-    val hashTags = stream.flatMap(status => status.getText.split(" ").filter(_.startsWith("#")))
+    val statuses = stream.map(status => status.getText())
+    statuses.print()
 
-    val topCounts60 = hashTags.map((_, 1)).reduceByKeyAndWindow(_ + _, Seconds(60))
-                     .map{case (topic, count) => (count, topic)}
-                     .transform(_.sortByKey(false))
+    // val hashTags = stream.flatMap(status => status.getText.split(" ").filter(_.startsWith("#")))
 
-    val topCounts10 = hashTags.map((_, 1)).reduceByKeyAndWindow(_ + _, Seconds(10))
-                     .map{case (topic, count) => (count, topic)}
-                     .transform(_.sortByKey(false))
+    // val topCounts60 = hashTags.map((_, 1)).reduceByKeyAndWindow(_ + _, Seconds(60))
+    //                  .map{case (topic, count) => (count, topic)}
+    //                  .transform(_.sortByKey(false))
+
+    // val topCounts10 = hashTags.map((_, 1)).reduceByKeyAndWindow(_ + _, Seconds(10))
+    //                  .map{case (topic, count) => (count, topic)}
+    //                  .transform(_.sortByKey(false))
 
 
-    // Print popular hashtags
-    topCounts60.foreachRDD(rdd => {
-      val topList = rdd.take(10)
-      println("\nPopular topics in last 60 seconds (%s total):".format(rdd.count()))
-      topList.foreach{case (count, tag) => println("%s (%s tweets)".format(tag, count))}
-    })
+    // // Print popular hashtags
+    // topCounts60.foreachRDD(rdd => {
+    //   val topList = rdd.take(10)
+    //   println("\nPopular topics in last 60 seconds (%s total):".format(rdd.count()))
+    //   topList.foreach{case (count, tag) => println("%s (%s tweets)".format(tag, count))}
+    // })
 
-    topCounts10.foreachRDD(rdd => {
-      val topList = rdd.take(10)
-      println("\nPopular topics in last 10 seconds (%s total):".format(rdd.count()))
-      topList.foreach{case (count, tag) => println("%s (%s tweets)".format(tag, count))}
-    })
+    // topCounts10.foreachRDD(rdd => {
+    //   val topList = rdd.take(10)
+    //   println("\nPopular topics in last 10 seconds (%s total):".format(rdd.count()))
+    //   topList.foreach{case (count, tag) => println("%s (%s tweets)".format(tag, count))}
+    // })
 
     ssc.start()
     ssc.awaitTermination()
