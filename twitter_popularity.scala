@@ -40,7 +40,7 @@ object Main extends App {
     // 		rdd.take(10).foreach{ case (user, tags, ats) => println("%s tweeted %s at %s\n".format(user, tags.mkString(", "), ats.mkString(", ") )) }
     // 	})
 
-	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats, 1) ) ) }
+	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats) ) ) }
 
 	// val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats, 1) ) ) }
 
@@ -59,7 +59,7 @@ object Main extends App {
 
     // val topHashtags = hashnum.reduceByKeyAndWindow(_ + _ , Seconds(2)).map{case(hash, num) => (num, hash)}.transform(_.sortByKey(false)).map{case(num, hash)=>(hash, num)}
 
-    val topHashtags = hashnum.reduceByKeyAndWindow(_ + _ , Seconds(2)).join(hashfirst).reduceByKey(  ( a, b ) => ( a(0) + b(0)  )  )
+    val topHashtags = hashnum.reduceByKeyAndWindow(_ + _ , Seconds(2)).join(hashfirst).reduceByKey(  ( a, b ) => ( a._1 + b._1  )  )
 
     topHashtags.print()
 
