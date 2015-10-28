@@ -42,24 +42,26 @@ object Main extends App {
 
 	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats) ) ) }
 
-	// val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats, 1) ) ) }
+	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats, 1) ) ) }
 
-	// val hashgroup = hashfirst.groupByKey().map{ case (tag, arr) => (tag, arr.foreach{ case ( user, at, num ) => } ) }
+	val hashgroup = hashfirst.groupByKey().collect()
 
-	// hashgroup.print()
+	hashgroup.print()
 
 
 
-	val hashnum = parsedTweetsWithHash.flatMap{ case (user, hashtags, ats) => hashtags.map( (_,1) ) }
+	// val hashnum = parsedTweetsWithHash.flatMap{ case (user, hashtags, ats) => hashtags.map( (_,1) ) }
 
-    // hashfirst.foreachRDD( rdd => {
-    // 		println("\nTop %s Tweets".format(top))
-    // 		rdd.take(top).foreach{ case (tag, user, ats) => println("%s by %s at %s".format(tag, user, ats.mkString(", ") )) }
-    // 	})
+ //    // hashfirst.foreachRDD( rdd => {
+ //    // 		println("\nTop %s Tweets".format(top))
+ //    // 		rdd.take(top).foreach{ case (tag, user, ats) => println("%s by %s at %s".format(tag, user, ats.mkString(", ") )) }
+ //    // 	})
 
-    val topHashtags = hashnum.reduceByKeyAndWindow(_ + _ , Seconds(2)).map{case(hash, num) => (num, hash)}.transform(_.sortByKey(false)).map{case(num, hash)=>(hash, num)}.cogroup(hashfirst)
+ //    val topHashtags = hashnum.reduceByKeyAndWindow(_ + _ , Seconds(2)).cogroup(hashfirst)
 
-    topHashtags.print()
+ //    topHashtags.foreachRDD( rdd => {
+
+ //    	})
 
     // topHashtags.foreachRDD( rdd => {
     // 	val ranks = rdd.take(top)
