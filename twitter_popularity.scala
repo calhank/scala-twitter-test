@@ -23,6 +23,8 @@ import org.apache.spark.SparkConf
     val ssc = new StreamingContext(sparkConf, Seconds(2))
     val stream = TwitterUtils.createStream(ssc, None, filters)
 
+    println(s"I got executed with ${args size} args, they are: ${args mkString ", "}")
+
     val hashTags = stream.flatMap(status => status.getText.split(" ").filter(_.startsWith("#")))
 
     val topCounts60 = hashTags.map((_, 1)).reduceByKeyAndWindow(_ + _, Seconds(60))
