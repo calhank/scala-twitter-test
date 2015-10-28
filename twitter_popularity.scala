@@ -7,7 +7,7 @@ import org.apache.spark.SparkConf
 
 object Main extends App {
 
-	if ( args.length < 3 ) {
+	if ( args.length < 2 ) {
 		System.err.println("Usage: <num_seconds_per_streaming_rdd> <num top hashtags> <filtertext>...")
 		System.exit(1)
 	}
@@ -41,7 +41,9 @@ object Main extends App {
 	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, user, ats ) ) }
 
     hashfirst.foreachRDD( rdd => {
-    		rdd.take(10).foreach{ case (tag, user, ats) => println("%s by %s at %s".format(tag, user, ats.mkString(", ") )) }
+    		val top = args(1.toInt)
+    		println("\nTop %s Tweets".format(top))
+    		rdd.take(top).foreach{ case (tag, user, ats) => println("%s by %s at %s".format(tag, user, ats.mkString(", ") )) }
     	})
 
     // statuses.saveAsTextFiles("http://50.23.16.227:19998/statuses")
