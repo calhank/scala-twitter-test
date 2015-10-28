@@ -40,22 +40,30 @@ object Main extends App {
     // 		rdd.take(10).foreach{ case (user, tags, ats) => println("%s tweeted %s at %s\n".format(user, tags.mkString(", "), ats.mkString(", ") )) }
     // 	})
 
-	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats) ) ) }
+	// val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats) ) ) }
 
-	val hashnum = parsedTweetsWithHash.flatMap{ case (user, hashtags, ats) => hashtags.map( (_,1) ) }
+	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats, 1) ) ) }
+
+	val hashgroup = hashfirst.groupByKey()
+
+	hashgroup.print()
+
+
+
+	// val hashnum = parsedTweetsWithHash.flatMap{ case (user, hashtags, ats) => hashtags.map( (_,1) ) }
 
     // hashfirst.foreachRDD( rdd => {
     // 		println("\nTop %s Tweets".format(top))
     // 		rdd.take(top).foreach{ case (tag, user, ats) => println("%s by %s at %s".format(tag, user, ats.mkString(", ") )) }
     // 	})
 
-    val topHashtags = hashnum.reduceByKeyAndWindow(_ + _ , Seconds(2)).map{case(hash, num) => (num, hash)}.transform(_.sortByKey(false))
+    // val topHashtags = hashnum.reduceByKeyAndWindow(_ + _ , Seconds(2)).map{case(hash, num) => (num, hash)}.transform(_.sortByKey(false))
 
-    topHashtags.foreachRDD( rdd => {
-    	val ranks = rdd.take(top)
-    	val joinstuff = ranks.map{case(count, tag)=>(tag,count)}.join(hashfirst)
-    	joinstuff.print()
-    	} )
+    // topHashtags.foreachRDD( rdd => {
+    // 	val ranks = rdd.take(top)
+    // 	val joinstuff = ranks.map{case(count, tag)=>(tag,count)}.join(hashfirst)
+    // 	joinstuff.print()
+    // 	} )
 
     // val joinstuff = topHashtags.join(hashfirst)
 
