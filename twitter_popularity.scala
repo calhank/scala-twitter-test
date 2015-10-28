@@ -1,4 +1,6 @@
-package org.apache.spark.streaming.twitter
+
+// package org.apache.spark.streaming.twitter
+package org.apache.spark.examples.streaming
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.SparkContext._
 import org.apache.spark.streaming.twitter._
@@ -9,7 +11,7 @@ object Main extends App {
 	println(s"I got executed with ${args size} args, they are: ${args mkString ", "}")
 
 	// your code goes here
-	 StreamingExamples.setStreamingLogLevels()
+	// StreamingExamples.setStreamingLogLevels()
 
     val filters = args
 
