@@ -59,7 +59,7 @@ object Main extends App {
 
     // val topHashtags = hashnum.reduceByKeyAndWindow(_ + _ , Seconds(2)).map{case(hash, num) => (num, hash)}.transform(_.sortByKey(false)).map{case(num, hash)=>(hash, num)}
 
-    val topHashtags = hashnum.reduceByKeyAndWindow(_ + _ , Seconds(2)).join(hashfirst)
+    val topHashtags = hashnum.reduceByKeyAndWindow(_ + _ , Seconds(2)).join(hashfirst).reduceByKey(  ( a, b ) => ( a(0) + b(0)  )  )
 
     topHashtags.print()
 
