@@ -12,6 +12,7 @@ object Main extends App {
 		System.exit(1)
 	}
 
+	val window = args(0).toInt
     val top = args(1).toInt
     val filters = args.takeRight( args.length - 2 )
 
@@ -25,7 +26,7 @@ object Main extends App {
     System.setProperty("twitter4j.oauth.accessTokenSecret", "H8DSy6MrLmMNnqk9IJh4JiTuk0XsDAmTfNgwmcb9OuQvk")
 
     val sparkConf = new SparkConf().setAppName("TwitterPopularTags")
-    val ssc = new StreamingContext(sparkConf, Seconds( args(0).toInt ))
+    val ssc = new StreamingContext(sparkConf, Seconds( 2 ))
     // val ssc = new StreamingContext(sparkConf, Seconds( 2 ) )
     val stream = TwitterUtils.createStream(ssc, None, filters)
 
@@ -39,15 +40,18 @@ object Main extends App {
     // 		rdd.take(10).foreach{ case (user, tags, ats) => println("%s tweeted %s at %s\n".format(user, tags.mkString(", "), ats.mkString(", ") )) }
     // 	})
 
-	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats, 1) ) ) }
-	hashfirst.print()
+	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats) ) ) }
+
+	val hashnum = parsedTweetsWithHash.flatMap{ case (user, hashtags, ats) => hashtags.map( (_,1) ) }.
 
     // hashfirst.foreachRDD( rdd => {
     // 		println("\nTop %s Tweets".format(top))
     // 		rdd.take(top).foreach{ case (tag, user, ats) => println("%s by %s at %s".format(tag, user, ats.mkString(", ") )) }
     // 	})
 
-    // val topHashtags = hashfitst.map{ case ()  }     ( _ , 1 ) ).reduceByKeyAndWindow
+    val topHashtags = hashnum.reduceByKeyAndWindow(_ + _ , Seconds(6)).map{case(hash, num) => (num, hash)}.transform(_.sortByKey(false))
+
+    topHashtags.print()
 
     // statuses.saveAsTextFiles("http://50.23.16.227:19998/statuses")
 
