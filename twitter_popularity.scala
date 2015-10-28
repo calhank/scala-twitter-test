@@ -33,7 +33,7 @@ object Main extends App {
 
     val statuses = stream.map(status => status.getUser().getScreenName())
     statuses.print()
-    statuses.saveAsTextFiles("tachyon://localhost:19998/users")
+    statuses.saveAsTextFiles("tachyon://50.23.16.227:19998/users")
 
 
     // val hashTags = stream.flatMap(status => status.getText.split(" ").filter(_.startsWith("#")))
@@ -64,6 +64,6 @@ object Main extends App {
     ssc.start()
     ssc.awaitTermination()
 
-    statuses.saveAsTextFiles("tachyon://localhost:19998/users2")
+    statuses.saveAsTextFiles("tachyon://50.23.16.227:19998/users2")
 
 }
