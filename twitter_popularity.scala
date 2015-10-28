@@ -6,7 +6,6 @@ object Main extends App {
 	import org.apache.spark.streaming.twitter._
 
 	println(s"I got executed with ${args size} args, they are: ${args mkString ", "}")
-	spark.eventLog.enabled = True
 
 	// your code goes here
 	val sparkConf = new SparkConf().setAppName("twitter_popularity")
