@@ -42,7 +42,7 @@ object Main extends App {
 
 	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats) ) ) }
 
-	val hashnum = parsedTweetsWithHash.flatMap{ case (user, hashtags, ats) => hashtags.map( (_,1) ) }.
+	val hashnum = parsedTweetsWithHash.flatMap{ case (user, hashtags, ats) => hashtags.map( (_,1) ) }
 
     // hashfirst.foreachRDD( rdd => {
     // 		println("\nTop %s Tweets".format(top))
