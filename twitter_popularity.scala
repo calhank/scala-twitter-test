@@ -32,13 +32,18 @@ object Main extends App {
 
     val parsedTweets = tweets.map{ case (user, text) => (user, text.filter(_.startsWith("#")), text.filter(_.startsWith("@")) ) }
 
-    // val parsedTweets = stream.map(status => ( status.getUser().getScreenName(), status.getText().split(" ").filter(_.startsWith("#")),  status.getText().split(" ").filter(_.startsWith("@"))) )
-
     val parsedTweetsWithHash = parsedTweets.filter{ case (_, hashtags, _) => hashtags.length > 0 }
-    // val statuses = stream.map( status => status.getUser().getScreenName() )
-    parsedTweetsWithHash.foreachRDD( rdd => {
-    		rdd.take(10).foreach{ case (user, tags, ats) => println("%s tweeted %s at %s\n".format(user, tags.mkString(", "), ats.mkString(", ") )) }
+
+    // parsedTweetsWithHash.foreachRDD( rdd => {
+    // 		rdd.take(10).foreach{ case (user, tags, ats) => println("%s tweeted %s at %s\n".format(user, tags.mkString(", "), ats.mkString(", ") )) }
+    // 	})
+
+	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, user, ats ) ) }
+
+    hashfirst.foreachRDD( rdd => {
+    		rdd.take(10).foreach{ case (tag, user, ats) => println("%s by %s at %s".format(tag, user, ats.mkString(", ") )) }
     	})
+
     // statuses.saveAsTextFiles("http://50.23.16.227:19998/statuses")
 
 
