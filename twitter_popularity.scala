@@ -28,9 +28,13 @@ object Main extends App {
     // val ssc = new StreamingContext(sparkConf, Seconds( 2 ) )
     val stream = TwitterUtils.createStream(ssc, None, filters)
 
-    val parsedTweets = stream.map(status => ( status.getUser().getScreenName(), status.getText().split(" ").filter(_.startsWith("#")),  status.getText().split(" ").filter(_.startsWith("@"))) )
+    val tweets = stream.map(status => ( status.getUser().getScreenName(), status.getText().split(" ") )
 
-    val parsedTweetsWithHash = parsedTweets.filter{ case (_, hashes, _) => hashes.length > 0 }
+    val parsedTweets = tweets.map( tweet => (tweet(0), tweet(1).filter(_.startsWith("#")), tweet(1).filter(_.startsWith("@")) ) )
+
+    // val parsedTweets = stream.map(status => ( status.getUser().getScreenName(), status.getText().split(" ").filter(_.startsWith("#")),  status.getText().split(" ").filter(_.startsWith("@"))) )
+
+    val parsedTweetsWithHash = parsedTweets.filter{ case (_, hashtags, _) => hashtags.length > 0 }
     // val statuses = stream.map( status => status.getUser().getScreenName() )
     parsedTweetsWithHash.foreachRDD( rdd => {
     		rdd.take(10).foreach{ case (user, tags, ats) => println("%s tweeted %s at %s\n".format(user, tags.mkString(", "), ats.mkString(", ") )) }
