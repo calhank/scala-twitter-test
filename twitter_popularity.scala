@@ -30,7 +30,7 @@ object Main extends App {
 
     val parsedTweets = stream.map(status => ( status.getUser().getScreenName(), status.getText().split(" ").filter(_.startsWith("#")),  status.getText().split(" ").filter(_.startsWith("@"))) )
 
-    val parsedTweetsWithHash = parsedTweets.filter(_(1).length>0)
+    val parsedTweetsWithHash = parsedTweets.filter{ case (_, hashes, _) => hashes.length > 0 }
     // val statuses = stream.map( status => status.getUser().getScreenName() )
     parsedTweetsWithHash.foreachRDD( rdd => {
     		rdd.take(10).foreach{ case (user, tags, ats) => println("%s tweeted %s at %s\n".format(user, tags.mkString(", "), ats.mkString(", ") )) }
