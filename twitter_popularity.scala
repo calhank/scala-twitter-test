@@ -14,7 +14,7 @@ object Main extends App {
 
 	println(s"I got executed with ${args size} args, they are: ${args mkString ", "}")
 
-    val filters = args
+    val filters = args.takeRight( args.length - 1 )
 
     // Set the system properties so that Twitter4j library used by twitter stream
     // can use them to generat OAuth credentials
@@ -24,7 +24,7 @@ object Main extends App {
     System.setProperty("twitter4j.oauth.accessTokenSecret", "H8DSy6MrLmMNnqk9IJh4JiTuk0XsDAmTfNgwmcb9OuQvk")
 
     val sparkConf = new SparkConf().setAppName("TwitterPopularTags")
-    val ssc = new StreamingContext(sparkConf, Seconds(2))
+    val ssc = new StreamingContext(sparkConf, Seconds( args.take(1) ))
     val stream = TwitterUtils.createStream(ssc, None, filters)
 
     println(s"I got executed with ${args size} args, they are: ${args mkString ", "}")
@@ -33,7 +33,6 @@ object Main extends App {
 
     val statuses = stream.map(status => status.getUser().getScreenName())
     statuses.print()
-    statuses.saveAsTextFiles("tachyon://50.23.16.227:19998/users")
 
 
     // val hashTags = stream.flatMap(status => status.getText.split(" ").filter(_.startsWith("#")))
@@ -62,8 +61,6 @@ object Main extends App {
 
 
     ssc.start()
-    ssc.awaitTermination()
-
-    statuses.saveAsTextFiles("tachyon://50.23.16.227:19998/users2")
+    ssc.awaitTermination(10)
 
 }
