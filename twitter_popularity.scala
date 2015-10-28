@@ -41,10 +41,12 @@ object Main extends App {
 	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, user, ats ) ) }
 
     hashfirst.foreachRDD( rdd => {
-    		val top = args(1.toInt)
+    		val top = args(1).toInt
     		println("\nTop %s Tweets".format(top))
     		rdd.take(top).foreach{ case (tag, user, ats) => println("%s by %s at %s".format(tag, user, ats.mkString(", ") )) }
     	})
+
+    hashfirst
 
     // statuses.saveAsTextFiles("http://50.23.16.227:19998/statuses")
 
