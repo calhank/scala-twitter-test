@@ -8,10 +8,12 @@ import org.apache.spark.SparkConf
 
 object Main extends App {
 
+	println(s"I got executed with ${args size} args, they are: ${args mkString ", "}")
+
 	// your code goes here
 	// StreamingExamples.setStreamingLogLevels()
 
-    val filters = None
+    val filters = args
 
     // Set the system properties so that Twitter4j library used by twitter stream
     // can use them to generat OAuth credentials
@@ -28,7 +30,6 @@ object Main extends App {
 
     val hashTags = stream.flatMap(status => status.getText.split(" ").filter(_.startsWith("#")))
 
-    // hashTags.print()
     val topCounts60 = hashTags.map((_, 1)).reduceByKeyAndWindow(_ + _, Seconds(60))
                      .map{case (topic, count) => (count, topic)}
                      .transform(_.sortByKey(false))
@@ -36,6 +37,7 @@ object Main extends App {
     val topCounts10 = hashTags.map((_, 1)).reduceByKeyAndWindow(_ + _, Seconds(10))
                      .map{case (topic, count) => (count, topic)}
                      .transform(_.sortByKey(false))
+
 
     // Print popular hashtags
     topCounts60.foreachRDD(rdd => {
