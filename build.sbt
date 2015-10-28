@@ -5,6 +5,7 @@ lazy val common = Seq(
   libraryDependencies ++= Seq(
     "org.apache.spark" % "spark-streaming_2.10" % "1.5.1" % "provided",
     "org.apache.spark" % "spark-streaming-twitter_2.10" % "1.5.1",
+    "org.twitter4j" % "twitter4j-stream" % "3.0.3",
     "com.typesafe" % "config" % "1.3.0"
   ),
   mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) =>
