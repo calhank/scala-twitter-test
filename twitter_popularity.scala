@@ -30,7 +30,7 @@ object Main extends App {
 
     val tweets = stream.map(status => ( status.getUser().getScreenName(), status.getText().split(" ") ) )
 
-    val parsedTweets = tweets.map( tweet => (tweet(0), tweet(1).filter(_.startsWith("#")), tweet(1).filter(_.startsWith("@")) ) )
+    val parsedTweets = tweets.map( case (user, text) => (user, text.filter(_.startsWith("#")), text.filter(_.startsWith("@")) ) )
 
     // val parsedTweets = stream.map(status => ( status.getUser().getScreenName(), status.getText().split(" ").filter(_.startsWith("#")),  status.getText().split(" ").filter(_.startsWith("@"))) )
 
