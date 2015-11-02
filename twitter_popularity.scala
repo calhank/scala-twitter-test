@@ -33,7 +33,7 @@ object Main extends App {
 
     val tweets = stream.map(status => ( status.getUser().getScreenName(), status.getText().split(" ") ) )
 
-    val parsedTweets = tweets.flatMap{ case (user, text) => (user, text.filter(_.startsWith("#")), text.filter(_.startsWith("@")) ) }
+    val parsedTweets = tweets.map{ case (user, text) => (user, text.filter(_.startsWith("#")), text.filter(_.startsWith("@")) ) }
 
     val parsedTweetsWithHash = parsedTweets.filter{ case (_, hashtags, _) => hashtags.length > 0 }
 
@@ -43,7 +43,7 @@ object Main extends App {
 
 	// val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats) ) ) }
 
-	val hashfirst = parsedTweetsWithHash.map{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, user + " " + ats.mkString(" ") + " ") )  }
+	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, user + " " + ats.mkString(" ") + " ") )  }
 
 	hashfirst.foreachRDD( rdd => {
 		rdd.take(top).foreach{
