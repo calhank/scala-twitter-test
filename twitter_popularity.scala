@@ -51,7 +51,7 @@ object Main extends App {
 	// 		}
 	// 	})
 	
-	hashfirst.persist(StorageLevel.OFF_HEAP)
+	// hashfirst.persist(StorageLevel.OFF_HEAP)
 
 	val aggregatedHashtags = hashfirst.reduceByKey( 
 		(users: Set[String]) => (users, 1),
