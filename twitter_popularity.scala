@@ -33,7 +33,7 @@ object Main extends App {
 
     val tweets = stream.map(status => ( status.getUser().getScreenName(), status.getText().split(" ") ) )
 
-    val parsedTweets = tweets.map{ case (user, text) => (user, text.filter(_.startsWith("#")), text.filter(_.startsWith("@")) ) }
+    val parsedTweets = tweets.flatMap{ case (user, text) => (user, text.filter(_.startsWith("#")), text.filter(_.startsWith("@")) ) }
 
     val parsedTweetsWithHash = parsedTweets.filter{ case (_, hashtags, _) => hashtags.length > 0 }
 
@@ -46,29 +46,25 @@ object Main extends App {
 	val hashfirst = parsedTweetsWithHash.map{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, user + " " + ats.mkString(" ") + " ") )  }
 
 	hashfirst.foreachRDD( rdd => {
-		rdd.take(top).foreach(println)
+		rdd.take(top).foreach{
+			case (tag, users) => println("%s with users: %s".format(tag, users))
+			}
 		})
-
-	// hashfirst.foreachRDD( rdd => {
-	// 	rdd.take(top).foreach{
-	// 		case (tag, users) => println("%s with users: %s".format(tag, users))
-	// 		}
-	// 	})
 	
 	// hashfirst.persist(StorageLevel.OFF_HEAP)
 
-	// val aggregatedHashtags = hashfirst.window(Seconds(runtime), Seconds(window)).combineByKey( 
-	// 	(tag: Set[String]) => (tag, 1),
-	// 	(combiner: (Set[String], Int), tag: Set[String]) => ( combiner._1 ++ tags, combiner._2 + 1 ),
-	// 	(comb1: (Set[String], Int), comb2: (Set[String], Int)) => (comb1._1 ++ comb2._1, comb1._2 + comb2._2),
-	// 	new org.apache.spark.HashPartitioner(10/2))
-	// .map{ case (tag, (users, count)) => (count, (tag, users))}
-	// .transform(_.sortByKey(false))
+	val aggregatedHashtags = hashfirst.window(Seconds(runtime), Seconds(window)).combineByKey( 
+		(tag: String) => (tag, 1),
+		(combiner: (String, Int), tag: String) => ( combiner._1 ++ tag, combiner._2 + 1 ),
+		(comb1: (String, Int), comb2: (String, Int)) => (comb1._1 ++ comb2._1, comb1._2 + comb2._2),
+		new org.apache.spark.HashPartitioner(10/2))
+	.map{ case (tag, (users, count)) => (count, (tag, users))}
+	.transform(_.sortByKey(false))
 
-	// aggregatedHashtags.foreachRDD( rdd => {
-	// 	out = rdd.collect()
-	// 	println("Top Results\n%s".format(out.mkString("\n")))
-	// 	})
+	aggregatedHashtags.foreachRDD( rdd => {
+		out = rdd.collect()
+		println("Top Results\n%s".format(out.mkString("\n")))
+		})
 
 
 	// val hashgroup = hashfirst.groupByKey().map{ case (tag, arr) => (tag, arr.foreach{ case ( user, at, num ) => } ) }
