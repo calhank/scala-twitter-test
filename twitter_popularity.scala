@@ -61,10 +61,10 @@ object Main extends App {
 	.map{ case (tag, (users, count)) => (count, (tag, users))}
 	.transform(_.sortByKey(false))
 
-	aggregatedHashtags.foreachRDD( rdd => {
-		out = rdd.collect()
-		println("Top Results\n%s".format(out.mkString("\n")))
-		})
+	// aggregatedHashtags.foreachRDD( rdd => {
+	// 	out = rdd.collect()
+	// 	println("Top Results\n%s".format(out.mkString("\n")))
+	// 	})
 
 
 	// val hashgroup = hashfirst.groupByKey().map{ case (tag, arr) => (tag, arr.foreach{ case ( user, at, num ) => } ) }
