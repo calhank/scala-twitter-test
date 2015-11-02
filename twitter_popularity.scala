@@ -54,11 +54,11 @@ object Main extends App {
 	// hashfirst.persist(StorageLevel.OFF_HEAP)
 
 	val aggregatedHashtags = hashfirst.window(Seconds(runtime), Seconds(window)).combineByKey( 
-		(users: Set[String]) => (users, 1),
-		(combiner: (Set[String], Int), users: Set[String]) => ( combiner._1 ++ users, combiner._2 + 1 ),
+		(tag: Set[String]) => (tag, 1),
+		(combiner: (Set[String], Int), tag: Set[String]) => ( combiner._1 ++ tags, combiner._2 + 1 ),
 		(comb1: (Set[String], Int), comb2: (Set[String], Int)) => (comb1._1 ++ comb2._1, comb1._2 + comb2._2),
 		new org.apache.spark.HashPartitioner(10/2))
-	.map{ case(tag, (users, count)) => (count, (tag, users))}
+	.map{ case (tag, (users, count)) => (count, (tag, users))}
 	.transform(_.sortByKey(false))
 
 	aggregatedHashtags.foreachRDD( rdd => {
