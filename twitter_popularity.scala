@@ -48,7 +48,7 @@ object Main extends App {
 	hashfirst.foreachRDD( rdd => {
 		rdd.take(top).foreach{
 			case (tag, users) => println("%s with users: %s".format(tag, users))
-			})
+			}
 		})
 	
 	// hashfirst.persist(StorageLevel.OFF_HEAP)
