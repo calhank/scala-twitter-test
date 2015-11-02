@@ -63,6 +63,7 @@ object Main extends App {
 
 	aggregatedHashtags.foreachRDD( rdd => {
 		out = rdd.collect()
+		println("Top Results\n%s".format(out.mkString("\n")))
 		})
 
 
@@ -126,6 +127,6 @@ object Main extends App {
 	ssc.awaitTerminationOrTimeout(runtime * 1000)
 	ssc.stop(true, true)
 
-	println("Top Results:\n%s".format(out.mkString("\n")))
+	// println("Top Results:\n%s".format(out.mkString("\n")))
 
 }
