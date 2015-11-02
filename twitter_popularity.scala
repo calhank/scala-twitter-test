@@ -46,7 +46,7 @@ object Main extends App {
 	val hashfirst = parsedTweetsWithHash.map{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, user + " " + ats.mkString(" ") + " ") )  }
 
 	hashfirst.foreachRDD( rdd => {
-		rdd.take(top).print()
+		rdd.take(top).foreach(println)
 		})
 
 	// hashfirst.foreachRDD( rdd => {
