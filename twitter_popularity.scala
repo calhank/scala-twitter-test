@@ -43,7 +43,7 @@ object Main extends App {
 
 	// val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats) ) ) }
 
-	val hashfirst = parsedTweetsWithHash.map{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, user + " " + ats.mkString(" ") + " ") )  }
+	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, user + " " + ats.mkString(" ") + " ") )  }
 
 	hashfirst.foreachRDD( rdd => {
 		rdd.take(top).foreach{
@@ -53,18 +53,18 @@ object Main extends App {
 	
 	// hashfirst.persist(StorageLevel.OFF_HEAP)
 
-	val aggregatedHashtags = hashfirst.window(Seconds(runtime), Seconds(window)).combineByKey( 
-		(tag: Set[String]) => (tag, 1),
-		(combiner: (Set[String], Int), tag: Set[String]) => ( combiner._1 ++ tags, combiner._2 + 1 ),
-		(comb1: (Set[String], Int), comb2: (Set[String], Int)) => (comb1._1 ++ comb2._1, comb1._2 + comb2._2),
-		new org.apache.spark.HashPartitioner(10/2))
-	.map{ case (tag, (users, count)) => (count, (tag, users))}
-	.transform(_.sortByKey(false))
+	// val aggregatedHashtags = hashfirst.window(Seconds(runtime), Seconds(window)).combineByKey( 
+	// 	(tag: Set[String]) => (tag, 1),
+	// 	(combiner: (Set[String], Int), tag: Set[String]) => ( combiner._1 ++ tags, combiner._2 + 1 ),
+	// 	(comb1: (Set[String], Int), comb2: (Set[String], Int)) => (comb1._1 ++ comb2._1, comb1._2 + comb2._2),
+	// 	new org.apache.spark.HashPartitioner(10/2))
+	// .map{ case (tag, (users, count)) => (count, (tag, users))}
+	// .transform(_.sortByKey(false))
 
-	aggregatedHashtags.foreachRDD( rdd => {
-		out = rdd.collect()
-		println("Top Results\n%s".format(out.mkString("\n")))
-		})
+	// aggregatedHashtags.foreachRDD( rdd => {
+	// 	out = rdd.collect()
+	// 	println("Top Results\n%s".format(out.mkString("\n")))
+	// 	})
 
 
 	// val hashgroup = hashfirst.groupByKey().map{ case (tag, arr) => (tag, arr.foreach{ case ( user, at, num ) => } ) }
