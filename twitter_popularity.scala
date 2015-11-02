@@ -45,15 +45,15 @@ object Main extends App {
 
 	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, user + " " + ats.mkString(" ") + " ") )  }
 
-	// hashfirst.foreachRDD( rdd => {
-	// 	rdd.take(top).foreach{
-	// 		case (tag, users) => println("%s with users: %s".format(tag, users))
-	// 		}
-	// 	})
+	hashfirst.foreachRDD( rdd => {
+		rdd.take(top).foreach{
+			case (tag, users) => println("%s with users: %s".format(tag, users))
+			}
+		})
 	
 	// hashfirst.persist(StorageLevel.OFF_HEAP)
 
-	val aggregatedHashtags = hashfirst.window(Seconds(runtime), Seconds(window)).reduceByKey( 
+	val aggregatedHashtags = hashfirst.window(Seconds(runtime), Seconds(window)).combineByKey( 
 		(users: Set[String]) => (users, 1),
 		(combiner: (Set[String], Int), users: Set[String]) => ( combiner._1 ++ users, combiner._2 + 1 ),
 		(comb1: (Set[String], Int), comb2: (Set[String], Int)) => (comb1._1 ++ comb2._1, comb1._2 + comb2._2)
