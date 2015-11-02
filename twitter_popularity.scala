@@ -43,19 +43,27 @@ object Main extends App {
 
 	// val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats) ) ) }
 
-	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user + ats.mkString) ) ) }
+	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user + " " + ats.mkString(" ") + " ") ) ) }
 
-	hashfirst.foreachRDD( rdd => {
-		rdd.take(top).foreach{
-			case (tag, users) => println("%s with users: %s".format(tag, users))
-			}
-		})
+	// hashfirst.foreachRDD( rdd => {
+	// 	rdd.take(top).foreach{
+	// 		case (tag, users) => println("%s with users: %s".format(tag, users))
+	// 		}
+	// 	})
 	
-	// hashfirst.persist(StorageLevel.OFF_HEAP)
+	hashfirst.persist(StorageLevel.OFF_HEAP)
 
-	// val aggregatedHashtags = hashfirst.reduceByKey( 
-	// 	case hashtag => 
-	//  )
+	val aggregatedHashtags = hashfirst.reduceByKey( 
+		(users: Set[String]) => (users, 1),
+		(combiner: (Set[String], Int), users: set[String]) => ( combiner._1 ++ users, combiner._2 + 1 ),
+		(comb1: (Set[String], Int), comb2: (Set[String], Int)) => (comb1._1 ++ comb2._1, comb1._2 ++ comb2._2)
+	 )
+	.map{ case(tag, (users, count)) => (count, (tag, users))}
+	.transform(_.sortByKey(false))
+
+	aggregatedHashtags.foreachRDD( rdd => {
+		out = rdd.collect()
+		})
 
 
 	// val hashgroup = hashfirst.groupByKey().map{ case (tag, arr) => (tag, arr.foreach{ case ( user, at, num ) => } ) }
@@ -118,6 +126,6 @@ object Main extends App {
 	ssc.awaitTerminationOrTimeout(runtime * 1000)
 	ssc.stop(true, true)
 
-	System.exit(0)
+	println("Top Results:\n%s".format(out.mkString("\n")))
 
 }
