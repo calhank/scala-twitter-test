@@ -7,16 +7,17 @@ import org.apache.spark.SparkConf
 
 object Main extends App {
 
-	if ( args.length < 2 ) {
-		System.err.println("Usage: <num_seconds_per_streaming_rdd> <num top hashtags> <filtertext>...")
+	if ( args.length < 3 ) {
+		System.err.println("Usage: <num_seconds_per_streaming_rdd> <total_runtime> <num top hashtags> <filtertext>...")
 		System.exit(1)
 	}
 
 	val window = args(0).toInt
     val top = args(1).toInt
-    val filters = args.takeRight( args.length - 2 )
+    val runtime = args(2).toInt
+    val filters = args.takeRight( args.length - 3 )
 
-	println("\nTwitter Hashtag Streaming\nBatch Length: %s seconds\nTop Tweets: %s\nFilters: %s\n".format(args(0), args(1), filters.mkString(", ")))
+	println("\nTwitter Hashtag Streaming\nBatch Length: %s seconds\nRuntime : %s seconds\nTop Tweets: %s\nFilters: %s\n".format(args(0), args(1), args(2), filters.mkString(", ")))
 
     // Set the system properties so that Twitter4j library used by twitter stream
     // can use them to generat OAuth credentials
@@ -40,9 +41,22 @@ object Main extends App {
     // 		rdd.take(10).foreach{ case (user, tags, ats) => println("%s tweeted %s at %s\n".format(user, tags.mkString(", "), ats.mkString(", ") )) }
     // 	})
 
-	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats) ) ) }
+	// val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats) ) ) }
 
-	// val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats, 1) ) ) }
+	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user + ats.mkString) ) ) }
+
+	hashfirst.foreachRDD( rdd => {
+		rdd.take(top.foreach{
+			case (tag, users) => println("%s with users: %s".format(tag, users))
+			})
+		})
+	
+	// hashfirst.persist(StorageLevel.OFF_HEAP)
+
+	// val aggregatedHashtags = hashfirst.reduceByKey( 
+	// 	case hashtag => 
+	//  )
+
 
 	// val hashgroup = hashfirst.groupByKey().map{ case (tag, arr) => (tag, arr.foreach{ case ( user, at, num ) => } ) }
 
@@ -50,7 +64,7 @@ object Main extends App {
 
 
 
-	val hashnum = parsedTweetsWithHash.flatMap{ case (user, hashtags, ats) => hashtags.map( (_,1) ) }
+	// val hashnum = parsedTweetsWithHash.flatMap{ case (user, hashtags, ats) => hashtags.map( (_,1) ) }
 
     // hashfirst.foreachRDD( rdd => {
     // 		println("\nTop %s Tweets".format(top))
@@ -59,9 +73,9 @@ object Main extends App {
 
     // val topHashtags = hashnum.reduceByKeyAndWindow(_ + _ , Seconds(2)).map{case(hash, num) => (num, hash)}.transform(_.sortByKey(false)).map{case(num, hash)=>(hash, num)}
 
-    val topHashtags = hashnum.reduceByKeyAndWindow(_ + _ , Seconds(2)).join(hashfirst).reduceByKey(  ( a, b ) => ( a._1 + b._1  )  )
+    // val topHashtags = hashnum.reduceByKeyAndWindow(_ + _ , Seconds(2)).join(hashfirst).reduceByKey(  ( a, b ) => ( a._1 + b._1  )  )/\
 
-    topHashtags.print()
+    // topHashtags.print()
 
     // topHashtags.foreachRDD( rdd => {
     // 	val ranks = rdd.take(top)
@@ -100,8 +114,10 @@ object Main extends App {
     //   topList.foreach{case (count, tag) => println("%s (%s tweets)".format(tag, count))}
     // })
 
+	ssc.start()
+	ssc.awaitTerminationOrTimeout(runtime * 1000)
+	ssc.stop(true, true)
 
-    ssc.start()
-    ssc.awaitTermination()
+	System.exit(0)
 
 }
