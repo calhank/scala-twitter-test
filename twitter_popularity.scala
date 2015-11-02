@@ -55,7 +55,7 @@ object Main extends App {
 
 	val aggregatedHashtags = hashfirst.reduceByKey( 
 		(users: Set[String]) => (users, 1),
-		(combiner: (Set[String], Int), users: set[String]) => ( combiner._1 ++ users, combiner._2 + 1 ),
+		(combiner: (Set[String], Int), users: Set[String]) => ( combiner._1 ++ users, combiner._2 + 1 ),
 		(comb1: (Set[String], Int), comb2: (Set[String], Int)) => (comb1._1 ++ comb2._1, comb1._2 ++ comb2._2)
 	 )
 	.map{ case(tag, (users, count)) => (count, (tag, users))}
