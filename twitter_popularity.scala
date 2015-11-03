@@ -68,7 +68,7 @@ object Main extends App {
 	aggregatedHashtags.foreachRDD( rdd => {
 		println("\nTop %s Results for Last %s Seconds:".format(top, window))
 		rdd.collect().take(top).foreach{ case ( num, (tag, users) ) => {
-			println("::: %s | %s appearances\nUSERS: \n".format( tag, num, users ) )
+			println("::: %s | %s appearances\nUSERS: %s \n".format( tag, num, users ) )
 			} }
 		})
 
