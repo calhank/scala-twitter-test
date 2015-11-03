@@ -69,7 +69,7 @@ object Main extends App {
 		println("\nTop Results:")
 		val i = 1
 		rdd.collect().take(top).foreach{ case ( num, (tag, users) ) => {
-			i = i + 1
+			val i = i + 1
 			println(":::%s TAG: %s | SCORE: %s\nUSERS: \n".format( i, tag, num, users ) )
 			} }
 		})
