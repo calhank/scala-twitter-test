@@ -35,7 +35,9 @@ object Main extends App {
 
     val parsedTweetsWithHash = parsedTweets.filter{ case (_, hashtags, _) => hashtags.length > 0 }
 
-	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, user + " " + ats.mkString(" ") + " ") )  }
+	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, "(" + user + " " + ats.mkString(" ") + ") ") )  }
+
+	// val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats,mkString(" "))) )  }
 	
 	hashfirst.persist(StorageLevel.OFF_HEAP)
 
@@ -49,7 +51,7 @@ object Main extends App {
 
 	aggregatedHashtags.foreachRDD( rdd => {
 		println("\nTop Results:")
-		rdd.collect().take(top).foreach{ case ( num, (tag, users) ) => println("::: %s was tweeted %s times with users: %s".format( tag, num, users ) ) }
+		rdd.collect().take(top).foreach{ case ( num, (tag, users) ) => println("::: TAG: %s SCORE: %s USERS: %s".format( tag, num, users ) ) }
 		})
 
 	ssc.start()
