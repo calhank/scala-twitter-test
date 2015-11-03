@@ -31,27 +31,47 @@ object Main extends App {
 
     val tweets = stream.map(status => ( status.getUser().getScreenName(), status.getText().split(" ") ) )
 
-    val parsedTweets = tweets.map{ case (user, text) => (user, text.filter(_.startsWith("#")), text.filter(_.startsWith("@")) ) }
+    val parsedTweets = tweets.map{ case (user, text) => (user,
+    	text.filter(_.startsWith("#")),
+    	text.filter(_.startsWith("@")) 
+    	) }
 
-    val parsedTweetsWithHash = parsedTweets.filter{ case (_, hashtags, _) => hashtags.length > 0 }
+    val parsedTweetsWithHash = parsedTweets.filter { 
+    	case (_, hashtags, _) => hashtags.length > 0 
+    }
 
-	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, "(" + user + " " + ats.mkString(" ") + ") ") )  }
+	val hashfirst = parsedTweetsWithHash.flatMap {
+		case(user, hashtags, ats) => hashtags.map( 
+			tag => ( tag, Array("(",user, ats.mkString(", "),") ").mkString(" ") ) 
+			)  
+	}
 
-	// val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats,mkString(" "))) )  }
+	// val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats)) )  }
 	
 	hashfirst.persist(StorageLevel.OFF_HEAP)
 
 	val aggregatedHashtags = hashfirst.window(Seconds(runtime), Seconds(window)).combineByKey( 
-		(tag: String) => (tag, 1),
-		(combiner: (String, Int), tag: String) => ( combiner._1 ++ tag, combiner._2 + 1 ),
-		(first: (String, Int), second: (String, Int)) => (first._1 ++ second._1, first._2 + second._2),
+		(users: String) => (users, 1),
+		(combiner: (String, Int), users: String) => {
+			val (new_users, count) = combiner
+			( new_users ++ users, count + 1 )
+			},
+		(first: (String, Int), second: (String, Int)) => {
+			val (users1, count1) = first
+			val (users2, count2) = second
+			(users1 ++ users2, count1 + count2)
+			},
 		new org.apache.spark.HashPartitioner(5))
 	.map{ case (tag, (users, count)) => (count, (tag, users))}
 	.transform(_.sortByKey(false))
 
 	aggregatedHashtags.foreachRDD( rdd => {
 		println("\nTop Results:")
-		rdd.collect().take(top).foreach{ case ( num, (tag, users) ) => println("::: TAG: %s SCORE: %s USERS: %s".format( tag, num, users ) ) }
+		val i = 1
+		rdd.collect().take(top).foreach{ case ( num, (tag, users) ) => {
+			i ++
+			println(":::%s TAG: %s | SCORE: %s\nUSERS: \n".format( i, tag, num, users ) )
+			} }
 		})
 
 	ssc.start()
