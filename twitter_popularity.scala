@@ -27,7 +27,7 @@ object Main extends App {
     System.setProperty("twitter4j.oauth.accessTokenSecret", "H8DSy6MrLmMNnqk9IJh4JiTuk0XsDAmTfNgwmcb9OuQvk")
 
     val sparkConf = new SparkConf().setAppName("TwitterPopularTags")
-    val ssc = new StreamingContext(sparkConf, Seconds( window ))
+    val ssc = new StreamingContext(sparkConf, Seconds( 1 ))
     // val ssc = new StreamingContext(sparkConf, Seconds( 2 ) )
     val stream = TwitterUtils.createStream(ssc, None, filters)
 
@@ -40,7 +40,7 @@ object Main extends App {
 	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, user + " " + ats.mkString(" ") + " ") )  }
 
 	
-	// hashfirst.persist(StorageLevel.OFF_HEAP)
+	hashfirst.persist(StorageLevel.OFF_HEAP)
 
 	val aggregatedHashtags = hashfirst.window(Seconds(runtime), Seconds(window)).combineByKey( 
 		(tag: String) => (tag, 1),
@@ -56,7 +56,7 @@ object Main extends App {
 		})
 
 	ssc.start()
-	ssc.awaitTerminationOrTimeout((runtime + window) * 1000)
+	ssc.awaitTerminationOrTimeout((runtime+window) * 1000)
 	ssc.stop(true, true)
 
 }
