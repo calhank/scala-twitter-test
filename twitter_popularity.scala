@@ -66,11 +66,9 @@ object Main extends App {
 	.transform(_.sortByKey(false))
 
 	aggregatedHashtags.foreachRDD( rdd => {
-		println("\nTop Results:")
-		val i = 1
+		println("\nTop %s Results for Last %s Seconds:".format(top, window))
 		rdd.collect().take(top).foreach{ case ( num, (tag, users) ) => {
-			val i = i + 1
-			println(":::%s TAG: %s | SCORE: %s\nUSERS: \n".format( i, tag, num, users ) )
+			println("::: %s | %s appearances\nUSERS: \n".format( tag, num, users ) )
 			} }
 		})
 
