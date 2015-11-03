@@ -42,7 +42,7 @@ object Main extends App {
 
 	val hashfirst = parsedTweetsWithHash.flatMap {
 		case(user, hashtags, ats) => hashtags.map( 
-			tag => ( tag, Array("(",user, ats.mkString(", "),") ").mkString(" ") ) 
+			tag => ( tag, "(" + user + " " + ats.mkString(", ") + ")" ) 
 			)  
 	}
 
@@ -54,12 +54,12 @@ object Main extends App {
 		(users: String) => (users, 1),
 		(combiner: (String, Int), users: String) => {
 			val (new_users, count) = combiner
-			( new_users ++ users, count + 1 )
+			( new_users + " " + users, count + 1 )
 			},
 		(first: (String, Int), second: (String, Int)) => {
 			val (users1, count1) = first
 			val (users2, count2) = second
-			(users1 ++ users2, count1 + count2)
+			(users1 + " " + users2, count1 + count2)
 			},
 		new org.apache.spark.HashPartitioner(5))
 	.map{ case (tag, (users, count)) => (count, (tag, users))}
