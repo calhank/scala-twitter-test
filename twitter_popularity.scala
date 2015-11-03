@@ -46,8 +46,8 @@ object Main extends App {
 	val aggregatedHashtags = hashfirst.window(Seconds(runtime), Seconds(window)).combineByKey( 
 		(tag: String) => (tag, 1),
 		(combiner: (String, Int), tag: String) => ( combiner._1 ++ tag, combiner._2 + 1 ),
-		(comb1: (String, Int), comb2: (String, Int)) => (comb1._1 ++ comb2._1, comb1._2 + comb2._2),
-		new org.apache.spark.HashPartitioner(10/2))
+		(first: (String, Int), second: (String, Int)) => (first._1 ++ second._1, first._2 + second._2),
+		new org.apache.spark.HashPartitioner())
 	.map{ case (tag, (users, count)) => (count, (tag, users))}
 	.transform(_.sortByKey(false))
 
@@ -57,7 +57,8 @@ object Main extends App {
 		})
 
 	ssc.start()
-	ssc.awaitTerminationOrTimeout((runtime+window) * 1000)
+	ssc.awaitTerminationOrTimeout(runtime * 1000)
 	ssc.stop(true, true)
+	System.exit(1)
 
 }
