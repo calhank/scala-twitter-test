@@ -47,7 +47,7 @@ object Main extends App {
 		(tag: String) => (tag, 1),
 		(combiner: (String, Int), tag: String) => ( combiner._1 ++ tag, combiner._2 + 1 ),
 		(first: (String, Int), second: (String, Int)) => (first._1 ++ second._1, first._2 + second._2),
-		new org.apache.spark.HashPartitioner())
+		new org.apache.spark.HashPartitioner(5))
 	.map{ case (tag, (users, count)) => (count, (tag, users))}
 	.transform(_.sortByKey(false))
 
