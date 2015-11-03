@@ -62,7 +62,7 @@ object Main extends App {
 	.transform(_.sortByKey(false))
 
 	aggregatedHashtags.foreachRDD( rdd => {
-		out = rdd.collect()
+		val out = rdd.collect()
 		println("Top Results\n%s".format(out.mkString("\n")))
 		})
 
