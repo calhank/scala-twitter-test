@@ -52,7 +52,7 @@ object Main extends App {
 
 	aggregatedHashtags.foreachRDD( rdd => {
 		println("\nTop Results:")
-		rdd.collect().take(top).foreach{ case ( num, (tag, users) ) => println("%s tweeted %s times with users: %s".format( tag, num, users.mkString(", ") ) ) }
+		rdd.collect().take(top).foreach{ case ( num, (tag, users) ) => println("%s tweeted %s times with users: %s".format( tag, num, users ) ) }
 		})
 
 	ssc.start()
