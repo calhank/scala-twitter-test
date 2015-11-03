@@ -45,11 +45,11 @@ object Main extends App {
 
 	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, user + " " + ats.mkString(" ") + " ") )  }
 
-	hashfirst.foreachRDD( rdd => {
-		rdd.take(top).foreach{
-			case (tag, users) => println("%s with users: %s".format(tag, users))
-			}
-		})
+	// hashfirst.foreachRDD( rdd => {
+	// 	rdd.take(top).foreach{
+	// 		case (tag, users) => println("%s with users: %s".format(tag, users))
+	// 		}
+	// 	})
 	
 	// hashfirst.persist(StorageLevel.OFF_HEAP)
 
@@ -62,7 +62,7 @@ object Main extends App {
 	.transform(_.sortByKey(false))
 
 	aggregatedHashtags.foreachRDD( rdd => {
-		val out = rdd.collect()
+		val out = rdd.collect().take(top)
 		println("Top Results\n%s".format(out.mkString("\n")))
 		})
 
