@@ -37,19 +37,8 @@ object Main extends App {
 
     val parsedTweetsWithHash = parsedTweets.filter{ case (_, hashtags, _) => hashtags.length > 0 }
 
-    // parsedTweetsWithHash.foreachRDD( rdd => {
-    // 		rdd.take(10).foreach{ case (user, tags, ats) => println("%s tweeted %s at %s\n".format(user, tags.mkString(", "), ats.mkString(", ") )) }
-    // 	})
-
-	// val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, (user, ats) ) ) }
-
 	val hashfirst = parsedTweetsWithHash.flatMap{ case(user, hashtags, ats) => hashtags.map( tag => ( tag, user + " " + ats.mkString(" ") + " ") )  }
 
-	// hashfirst.foreachRDD( rdd => {
-	// 	rdd.take(top).foreach{
-	// 		case (tag, users) => println("%s with users: %s".format(tag, users))
-	// 		}
-	// 	})
 	
 	// hashfirst.persist(StorageLevel.OFF_HEAP)
 
@@ -62,71 +51,13 @@ object Main extends App {
 	.transform(_.sortByKey(false))
 
 	aggregatedHashtags.foreachRDD( rdd => {
+		println("\nTop Results:")
 		val out = rdd.collect().take(top)
-		println("\nTop Results:%s".format(out.mkString("\n")))
+		out.foreach( case ( num, (tag, users) ) => println("%s tweeted %s times with users: %s".format(tag, num, users.mkString(", "))))
 		})
-
-
-	// val hashgroup = hashfirst.groupByKey().map{ case (tag, arr) => (tag, arr.foreach{ case ( user, at, num ) => } ) }
-
-	// hashgroup.print()
-
-
-
-	// val hashnum = parsedTweetsWithHash.flatMap{ case (user, hashtags, ats) => hashtags.map( (_,1) ) }
-
-    // hashfirst.foreachRDD( rdd => {
-    // 		println("\nTop %s Tweets".format(top))
-    // 		rdd.take(top).foreach{ case (tag, user, ats) => println("%s by %s at %s".format(tag, user, ats.mkString(", ") )) }
-    // 	})
-
-    // val topHashtags = hashnum.reduceByKeyAndWindow(_ + _ , Seconds(2)).map{case(hash, num) => (num, hash)}.transform(_.sortByKey(false)).map{case(num, hash)=>(hash, num)}
-
-    // val topHashtags = hashnum.reduceByKeyAndWindow(_ + _ , Seconds(2)).join(hashfirst).reduceByKey(  ( a, b ) => ( a._1 + b._1  )  )/\
-
-    // topHashtags.print()
-
-    // topHashtags.foreachRDD( rdd => {
-    // 	val ranks = rdd.take(top)
-    // 	val joinstuff = ranks.map{case(count, tag)=>(tag,count)}.join(hashfirst)
-    // 	joinstuff.print()
-    // 	} )
-
-    // val joinstuff = topHashtags.join(hashfirst)
-
-    // joinstuff.print()
-
-    // statuses.saveAsTextFiles("http://50.23.16.227:19998/statuses")
-
-
-    // val hashTags = stream.flatMap(status => status.getText.split(" ").filter(_.startsWith("#")))
-
-    // val topCounts60 = hashTags.map((_, 1)).reduceByKeyAndWindow(_ + _, Seconds(60))
-    //                  .map{case (topic, count) => (count, topic)}
-    //                  .transform(_.sortByKey(false))
-
-    // val topCounts10 = hashTags.map((_, 1)).reduceByKeyAndWindow(_ + _, Seconds(10))
-    //                  .map{case (topic, count) => (count, topic)}
-    //                  .transform(_.sortByKey(false))
-
-
-    // // Print popular hashtags
-    // topCounts60.foreachRDD(rdd => {
-    //   val topList = rdd.take(10)
-    //   println("\nPopular topics in last 60 seconds (%s total):".format(rdd.count()))
-    //   topList.foreach{case (count, tag) => println("%s (%s tweets)".format(tag, count))}
-    // })
-
-    // topCounts10.foreachRDD(rdd => {
-    //   val topList = rdd.take(10)
-    //   println("\nPopular topics in last 10 seconds (%s total):".format(rdd.count()))
-    //   topList.foreach{case (count, tag) => println("%s (%s tweets)".format(tag, count))}
-    // })
 
 	ssc.start()
 	ssc.awaitTerminationOrTimeout((runtime + window) * 1000)
 	ssc.stop(true, true)
-
-	println("Final Top Results:\n%s".format(out.mkString("\n")))
 
 }
