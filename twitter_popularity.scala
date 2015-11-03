@@ -13,11 +13,11 @@ object Main extends App {
 	}
 
 	val window = args(0).toInt
-    val top = args(1).toInt
-    val runtime = args(2).toInt
+    val runtime = args(1).toInt
+    val top = args(2).toInt
     val filters = args.takeRight( args.length - 3 )
 
-	println("\nTwitter Hashtag Streaming\nBatch Length: %s seconds\nRuntime : %s seconds\nTop Tweets: %s\nFilters: %s\n".format(args(0), args(1), args(2), filters.mkString(", ")))
+	println("\nTwitter Hashtag Streaming\nBatch Length: %s seconds\nRuntime : %s seconds\nTop Tweets: %s\nFilters: %s\n".format(window, runtime, top, filters.mkString(", ")))
 
     // Set the system properties so that Twitter4j library used by twitter stream
     // can use them to generat OAuth credentials
@@ -61,10 +61,10 @@ object Main extends App {
 	.map{ case (tag, (users, count)) => (count, (tag, users))}
 	.transform(_.sortByKey(false))
 
-	// aggregatedHashtags.foreachRDD( rdd => {
-	// 	out = rdd.collect()
-	// 	println("Top Results\n%s".format(out.mkString("\n")))
-	// 	})
+	aggregatedHashtags.foreachRDD( rdd => {
+		out = rdd.collect()
+		println("Top Results\n%s".format(out.mkString("\n")))
+		})
 
 
 	// val hashgroup = hashfirst.groupByKey().map{ case (tag, arr) => (tag, arr.foreach{ case ( user, at, num ) => } ) }
